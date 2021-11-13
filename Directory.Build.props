@@ -1,0 +1,24 @@
+<Project>
+
+  <PropertyGroup>
+    <LangVersion>10.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <Deterministic>true</Deterministic>
+    <NoWarn>$(NoWarn),1573,1591,1712</NoWarn>
+    <MSBuildWarningsAsMessages>SA0001</MSBuildWarningsAsMessages>
+    <WarningsAsErrors>nullable</WarningsAsErrors>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <AnalysisMode>AllEnabledByDefault</AnalysisMode>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.354">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+</Project>
