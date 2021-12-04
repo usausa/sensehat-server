@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "WorkSenseHat": {
+      "commandName": "Project",
+      "commandLineArgs": "d:\\1.dat"
+    }
+  }
+}
