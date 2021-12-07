@@ -55,12 +55,13 @@ public sealed class StorageService
     {
         cancellationToken.ThrowIfCancellationRequested();
 
+        path = NormalizePath(path);
+
         if (!File.Exists(path))
         {
             return ValueTask.FromResult((Stream?)null);
         }
 
-        path = NormalizePath(path);
         return ValueTask.FromResult((Stream?)File.OpenRead(path));
     }
 }
