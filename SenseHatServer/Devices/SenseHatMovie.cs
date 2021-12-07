@@ -77,16 +77,17 @@ public sealed class SenseHatMovie : IDisposable
     public async ValueTask SaveAsync(Stream stream, CancellationToken cancellation = default)
     {
         var size = HeaderSize + (((Width * Height * 2) + WaitSize) * FrameCount);
-        await stream.WriteAsync(buffer, 0, size, cancellation).ConfigureAwait(false);
+        await stream.WriteAsync(buffer.AsMemory(0, size), cancellation).ConfigureAwait(false);
         await stream.FlushAsync(cancellation).ConfigureAwait(false);
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "Factory")]
     public static async ValueTask<SenseHatMovie> LoadAsync(Stream stream, CancellationToken cancellation = default)
     {
         var header = ArrayPool<byte>.Shared.Rent(HeaderSize);
         try
         {
-            var read = await stream.ReadAsync(header, 0, HeaderSize, cancellation).ConfigureAwait(false);
+            var read = await stream.ReadAsync(header.AsMemory(0, HeaderSize), cancellation).ConfigureAwait(false);
             if (read != HeaderSize)
             {
                 throw new IOException("Hat movie load failed.");
@@ -103,7 +104,7 @@ public sealed class SenseHatMovie : IDisposable
             var movie = new SenseHatMovie(width, height, frame);
 
             var size = ((width * height * 2) + WaitSize) * frame;
-            read = await stream.ReadAsync(movie.buffer, HeaderSize, size, cancellation).ConfigureAwait(false);
+            read = await stream.ReadAsync(movie.buffer.AsMemory(HeaderSize, size), cancellation).ConfigureAwait(false);
             if (read != size)
             {
                 throw new IOException("Hat movie load failed.");
