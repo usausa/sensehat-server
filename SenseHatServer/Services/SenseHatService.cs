@@ -69,7 +69,7 @@ public sealed class SenseHatService : IDisposable
     public void Clear() =>
         RunOnWorker(async cancel => await clearImage.ShowAsync(device, cancel).ConfigureAwait(false));
 
-    public void ShowAsync(SenseHatImage image) =>
+    public void Show(SenseHatImage image) =>
         RunOnWorker(async cancel => await image.ShowAsync(device, cancel).ConfigureAwait(false));
 
     public void Play(SenseHatMovie movie) =>

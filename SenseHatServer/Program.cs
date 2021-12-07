@@ -1,5 +1,9 @@
+using System.Globalization;
+
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
+using SenseHatServer.Devices;
 using SenseHatServer.Services;
 
 using Serilog;
@@ -52,17 +56,56 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 
-// TODO ignore api
-app.MapGet("/", () => "Sense Hat API");
-// TODO parameter
-app.MapPost("/play", () =>
+// Map
+app.MapGet("/", () => "Sense Hat API").ExcludeFromDescription();
+
+app.MapPost("play/{file}", async ([FromRoute] string file, [FromServices] StorageService storage, [FromServices] SenseHatService senseHat) =>
 {
+    await using var stream = await storage.ReadAsync(file);
+    if (stream is null)
+    {
+        return Results.NotFound();
+    }
+
+    var movie = await SenseHatMovie.LoadAsync(stream);
+    senseHat.Play(movie);
+
+    return Results.Ok();
 });
-app.MapPost("/cancel", () =>
+
+app.MapPost("/cancel", ([FromServices] SenseHatService senseHat) =>
 {
+    senseHat.Cancel();
+
+    return Results.Ok();
 });
-app.MapPost("/clear", () =>
+
+app.MapPost("/clear", ([FromServices] SenseHatService senseHat) =>
 {
+    senseHat.Clear();
+
+    return Results.Ok();
+});
+
+app.MapPost("/show", ([FromBody] string[][] values, [FromServices] SenseHatService senseHat) =>
+{
+    var height = (byte)values.Length;
+    var width = (byte)values.Max(x => x.Length);
+    var image = new SenseHatImage(width, height);
+    for (byte y = 0; y < height; y++)
+    {
+        for (byte x = 0; x < width; x++)
+        {
+            if (Int32.TryParse(values[y][x].TrimStart('#'), NumberStyles.HexNumber, null, out var rgb))
+            {
+                image.SetPixel(x, y, new SenseHatColor((byte)((rgb >> 16) & 0xFF), (byte)((rgb >> 8) & 0xFF), (byte)(rgb & 0xFF)));
+            }
+        }
+    }
+
+    senseHat.Show(image);
+
+    return Results.Ok();
 });
 
 app.Run();
