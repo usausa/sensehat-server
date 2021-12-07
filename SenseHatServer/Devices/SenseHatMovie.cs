@@ -29,6 +29,11 @@ public sealed class SenseHatMovie : IDisposable
 
     public SenseHatMovie(byte width, byte height, int frame)
     {
+        if (frame < 0)
+        {
+            throw new ArgumentException("Invalid frame size.", nameof(frame));
+        }
+
         buffer = ArrayPool<byte>.Shared.Rent(HeaderSize + (((width * height * 2) + WaitSize) * frame));
         BinaryPrimitives.WriteInt32LittleEndian(buffer.AsSpan(FrameOffset), frame);
         buffer[WidthOffset] = width;
@@ -66,6 +71,49 @@ public sealed class SenseHatMovie : IDisposable
             await stream.FlushAsync(cancellation).ConfigureAwait(false);
 
             await Task.Delay(BinaryPrimitives.ReadInt32LittleEndian(buffer.AsSpan(offset + size)), cancellation).ConfigureAwait(false);
+        }
+    }
+
+    public async ValueTask SaveAsync(Stream stream, CancellationToken cancellation = default)
+    {
+        var size = HeaderSize + (((Width * Height * 2) + WaitSize) * FrameCount);
+        await stream.WriteAsync(buffer, 0, size, cancellation).ConfigureAwait(false);
+        await stream.FlushAsync(cancellation).ConfigureAwait(false);
+    }
+
+    public static async ValueTask<SenseHatMovie> LoadAsync(Stream stream, CancellationToken cancellation = default)
+    {
+        var header = ArrayPool<byte>.Shared.Rent(HeaderSize);
+        try
+        {
+            var read = await stream.ReadAsync(header, 0, HeaderSize, cancellation).ConfigureAwait(false);
+            if (read != HeaderSize)
+            {
+                throw new IOException("Hat movie load failed.");
+            }
+
+            var width = header[WidthOffset];
+            var height = header[HeightOffset];
+            var frame = BinaryPrimitives.ReadInt32LittleEndian(header.AsSpan(FrameOffset));
+            if (frame < 0)
+            {
+                throw new IOException("Hat movie load failed.");
+            }
+
+            var movie = new SenseHatMovie(width, height, frame);
+
+            var size = ((width * height * 2) + WaitSize) * frame;
+            read = await stream.ReadAsync(movie.buffer, HeaderSize, size, cancellation).ConfigureAwait(false);
+            if (read != size)
+            {
+                throw new IOException("Hat movie load failed.");
+            }
+
+            return movie;
+        }
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(header);
         }
     }
 }

@@ -31,8 +31,8 @@ public sealed class SenseHatImage : IDisposable
     public void SetPixel(byte x, byte y, SenseHatColor color)
     {
         var offset = ((y * Width) + x) * 2;
-        buffer[offset] = color.Byte1;
-        buffer[offset + 1] = color.Byte2;
+        buffer[offset] = color.Byte0;
+        buffer[offset + 1] = color.Byte1;
     }
 
     public void Clear()
@@ -45,5 +45,23 @@ public sealed class SenseHatImage : IDisposable
         stream.Seek(0, SeekOrigin.Begin);
         await stream.WriteAsync(buffer.AsMemory(0, bufferSize), cancellation).ConfigureAwait(false);
         await stream.FlushAsync(cancellation).ConfigureAwait(false);
+    }
+
+    public async ValueTask SaveAsync(Stream stream, CancellationToken cancellation = default)
+    {
+        await stream.WriteAsync(buffer, 0, bufferSize, cancellation).ConfigureAwait(false);
+        await stream.FlushAsync(cancellation).ConfigureAwait(false);
+    }
+
+    public static async ValueTask<SenseHatImage> LoadAsync(Stream stream, byte width, byte height, CancellationToken cancellation = default)
+    {
+        var image = new SenseHatImage(width, height);
+        var read = await stream.ReadAsync(image.buffer, 0, image.bufferSize, cancellation).ConfigureAwait(false);
+        if (read != image.bufferSize)
+        {
+            throw new IOException("Hat image load failed.");
+        }
+
+        return image;
     }
 }

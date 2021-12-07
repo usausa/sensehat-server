@@ -24,7 +24,7 @@ public sealed class SenseHatFrame
     public void SetPixel(byte x, byte y, SenseHatColor color)
     {
         var offset = (((y * Width) + x) * 2) + bufferOffset;
-        buffer[offset] = color.Byte1;
-        buffer[offset + 1] = color.Byte2;
+        buffer[offset] = color.Byte0;
+        buffer[offset + 1] = color.Byte1;
     }
 }
