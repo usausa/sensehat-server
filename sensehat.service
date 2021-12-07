@@ -1,0 +1,13 @@
+[Unit]
+Description=Sense Hat Server
+DefaultDependencies=no
+
+After=network.target
+
+[Service]
+WorkingDirectory=/opt/sensehat/bin
+ExecStart=/opt/sensehat/bin/SenseHatServer
+Environment=DOTNET_ROOT=/opt/dotnet
+
+[Install]
+WantedBy=multi-user.target
