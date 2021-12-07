@@ -6,8 +6,6 @@ using Microsoft.Extensions.Options;
 using SenseHatServer.Devices;
 using SenseHatServer.Services;
 
-using Serilog;
-
 #pragma warning disable CA1812
 
 //--------------------------------------------------------------------------------
@@ -15,17 +13,6 @@ using Serilog;
 //--------------------------------------------------------------------------------
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Log
-builder.Host
-    .ConfigureLogging((_, logging) =>
-    {
-        logging.ClearProviders();
-    })
-    .UseSerilog((hostingContext, loggerConfiguration) =>
-    {
-        loggerConfiguration.ReadFrom.Configuration(hostingContext.Configuration);
-    });
 
 // Route
 builder.Services.Configure<RouteOptions>(options =>
