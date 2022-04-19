@@ -1,7 +1,5 @@
 namespace SenseHatServer.Services;
 
-using System.Diagnostics.CodeAnalysis;
-
 public sealed class StorageException : Exception
 {
     public StorageException()
@@ -21,8 +19,7 @@ public sealed class StorageException : Exception
 
 public sealed class StorageServiceOptions
 {
-    [AllowNull]
-    public string Root { get; set; }
+    public string Root { get; set; } = default!;
 }
 
 public sealed class StorageService

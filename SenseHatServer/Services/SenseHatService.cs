@@ -1,14 +1,11 @@
 namespace SenseHatServer.Services;
 
-using System.Diagnostics.CodeAnalysis;
-
 using SenseHatServer.Devices;
 using SenseHatServer.Infrastructure;
 
 public sealed class SenseHatServiceOptions
 {
-    [AllowNull]
-    public string Device { get; set; }
+    public string Device { get; set; } = default!;
 
     public byte Width { get; set; }
 
@@ -75,7 +72,7 @@ public sealed class SenseHatService : IDisposable
     public void Play(SenseHatMovie movie) =>
         RunOnWorker(async cancel => await movie.PlayAsync(device, cancel).ConfigureAwait(false));
 
-    [SuppressMessage("Microsoft.Reliability", "CA2008:Do not create tasks without passing a TaskScheduler", Justification = "Ignore")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2008:Do not create tasks without passing a TaskScheduler", Justification = "Ignore")]
     private void RunOnWorker(Func<CancellationToken, ValueTask> func)
     {
         lock (sync)
