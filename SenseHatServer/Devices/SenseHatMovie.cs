@@ -38,7 +38,7 @@ public sealed class SenseHatMovie : IDisposable
         BinaryPrimitives.WriteInt32LittleEndian(buffer.AsSpan(FrameOffset), frame);
         buffer[WidthOffset] = width;
         buffer[HeightOffset] = height;
-        buffer.AsSpan(HeaderSize).Fill(0);
+        buffer.AsSpan(HeaderSize).Clear();
     }
 
     public void Dispose()

@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 using SenseHatServer.Devices;
 using SenseHatServer.Services;
 
-#pragma warning disable CA1812
+#pragma warning disable CA1852
 
 //--------------------------------------------------------------------------------
 // Configure builder

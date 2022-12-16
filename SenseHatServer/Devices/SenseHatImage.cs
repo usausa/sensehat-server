@@ -19,7 +19,7 @@ public sealed class SenseHatImage : IDisposable
         Height = height;
         bufferSize = width * height * 2;
         buffer = ArrayPool<byte>.Shared.Rent(bufferSize);
-        buffer.AsSpan(0, bufferSize).Fill(0);
+        buffer.AsSpan(0, bufferSize).Clear();
     }
 
     public void Dispose()
@@ -37,7 +37,7 @@ public sealed class SenseHatImage : IDisposable
 
     public void Clear()
     {
-        buffer.AsSpan(0, bufferSize).Fill(0);
+        buffer.AsSpan(0, bufferSize).Clear();
     }
 
     public async ValueTask ShowAsync(Stream stream, CancellationToken cancellation = default)
