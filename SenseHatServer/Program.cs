@@ -15,7 +15,7 @@ using SenseHatServer.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Route
-builder.Services.Configure<RouteOptions>(options =>
+builder.Services.Configure<RouteOptions>(static options =>
 {
     options.AppendTrailingSlash = true;
 });
