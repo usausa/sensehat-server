@@ -26,12 +26,12 @@ builder.Services.AddSwaggerGen();
 
 // Storage
 builder.Services.Configure<StorageServiceOptions>(builder.Configuration.GetSection("Storage"));
-builder.Services.AddSingleton(p => p.GetRequiredService<IOptions<StorageServiceOptions>>().Value);
+builder.Services.AddSingleton(static p => p.GetRequiredService<IOptions<StorageServiceOptions>>().Value);
 builder.Services.AddSingleton<StorageService>();
 
 // SenseHat
 builder.Services.Configure<SenseHatServiceOptions>(builder.Configuration.GetSection("SenseHat"));
-builder.Services.AddSingleton(p => p.GetRequiredService<IOptions<SenseHatServiceOptions>>().Value);
+builder.Services.AddSingleton(static p => p.GetRequiredService<IOptions<SenseHatServiceOptions>>().Value);
 builder.Services.AddSingleton<SenseHatService>();
 
 //--------------------------------------------------------------------------------
@@ -44,7 +44,7 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 // Map
-app.MapGet("/", () => "Sense Hat API").ExcludeFromDescription();
+app.MapGet("/", static () => "Sense Hat API").ExcludeFromDescription();
 
 app.MapPost("play/{file}", async ([FromRoute] string file, [FromServices] StorageService storage, [FromServices] SenseHatService senseHat) =>
 {
@@ -77,7 +77,7 @@ app.MapPost("/clear", ([FromServices] SenseHatService senseHat) =>
 app.MapPost("/show", ([FromBody] string[][] values, [FromServices] SenseHatService senseHat) =>
 {
     var height = (byte)values.Length;
-    var width = (byte)values.Max(x => x.Length);
+    var width = (byte)values.Max(static x => x.Length);
     var image = new SenseHatImage(width, height);
     for (byte y = 0; y < height; y++)
     {

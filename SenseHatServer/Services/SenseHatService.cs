@@ -63,16 +63,13 @@ public sealed class SenseHatService : IDisposable
         }
     }
 
-    public void Clear() =>
-        RunOnWorker(async cancel => await clearImage.ShowAsync(device, cancel).ConfigureAwait(false));
+    public void Clear() => RunOnWorker(cancel => clearImage.ShowAsync(device, cancel));
 
-    public void Show(SenseHatImage image) =>
-        RunOnWorker(async cancel => await image.ShowAsync(device, cancel).ConfigureAwait(false));
+    public void Show(SenseHatImage image) => RunOnWorker(cancel => image.ShowAsync(device, cancel));
 
-    public void Play(SenseHatMovie movie) =>
-        RunOnWorker(async cancel => await movie.PlayAsync(device, cancel).ConfigureAwait(false));
+    public void Play(SenseHatMovie movie) => RunOnWorker(cancel => movie.PlayAsync(device, cancel));
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2008:Do not create tasks without passing a TaskScheduler", Justification = "Ignore")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2008:Do not create tasks without passing a TaskScheduler", Justification = "Ignore")]
     private void RunOnWorker(Func<CancellationToken, ValueTask> func)
     {
         lock (sync)
