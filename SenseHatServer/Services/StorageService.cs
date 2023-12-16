@@ -47,7 +47,6 @@ public sealed class StorageService
         return fullPath;
     }
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "Factory")]
     public ValueTask<Stream?> ReadAsync(string path, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -59,6 +58,8 @@ public sealed class StorageService
             return ValueTask.FromResult((Stream?)null);
         }
 
+#pragma warning disable CA2000
         return ValueTask.FromResult((Stream?)File.OpenRead(path));
+#pragma warning restore CA2000
     }
 }

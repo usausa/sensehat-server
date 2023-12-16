@@ -69,7 +69,6 @@ public sealed class SenseHatService : IDisposable
 
     public void Play(SenseHatMovie movie) => RunOnWorker(cancel => movie.PlayAsync(device, cancel));
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2008:Do not create tasks without passing a TaskScheduler", Justification = "Ignore")]
     private void RunOnWorker(Func<CancellationToken, ValueTask> func)
     {
         lock (sync)
@@ -80,6 +79,7 @@ public sealed class SenseHatService : IDisposable
             lastTokenSource = cts;
 
             // ReSharper disable once MethodSupportsCancellation
+#pragma warning disable CA2008
             lastRequest = workerFactory.StartNew(async state =>
             {
                 try
@@ -90,6 +90,7 @@ public sealed class SenseHatService : IDisposable
                 {
                 }
             }, cts.Token);
+#pragma warning restore CA2008
         }
     }
 }

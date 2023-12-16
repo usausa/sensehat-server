@@ -5,7 +5,7 @@ public class LimitedConcurrencyTaskScheduler : TaskScheduler
     [ThreadStatic]
     private static bool threadIsProcessing;
 
-    private readonly LinkedList<Task> tasks = new();
+    private readonly LinkedList<Task> tasks = [];
 
     private int currentRunningThreads;
 
