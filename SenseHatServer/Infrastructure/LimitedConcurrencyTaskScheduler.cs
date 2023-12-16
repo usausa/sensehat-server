@@ -1,6 +1,6 @@
 namespace SenseHatServer.Infrastructure;
 
-public class LimitedConcurrencyTaskScheduler : TaskScheduler
+public sealed class LimitedConcurrencyTaskScheduler : TaskScheduler
 {
     [ThreadStatic]
     private static bool threadIsProcessing;
@@ -19,7 +19,7 @@ public class LimitedConcurrencyTaskScheduler : TaskScheduler
         MaximumConcurrencyLevel = maxConcurrency;
     }
 
-    protected sealed override void QueueTask(Task task)
+    protected override void QueueTask(Task task)
     {
         lock (tasks)
         {
@@ -64,7 +64,7 @@ public class LimitedConcurrencyTaskScheduler : TaskScheduler
         }, null);
     }
 
-    protected sealed override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued)
+    protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued)
     {
         if (!threadIsProcessing)
         {
@@ -79,7 +79,7 @@ public class LimitedConcurrencyTaskScheduler : TaskScheduler
         return TryExecuteTask(task);
     }
 
-    protected sealed override bool TryDequeue(Task task)
+    protected override bool TryDequeue(Task task)
     {
         lock (tasks)
         {
@@ -87,9 +87,9 @@ public class LimitedConcurrencyTaskScheduler : TaskScheduler
         }
     }
 
-    public sealed override int MaximumConcurrencyLevel { get; }
+    public override int MaximumConcurrencyLevel { get; }
 
-    protected sealed override IEnumerable<Task> GetScheduledTasks()
+    protected override IEnumerable<Task> GetScheduledTasks()
     {
         var lockTaken = false;
         try
