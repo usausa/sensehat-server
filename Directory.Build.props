@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <Deterministic>true</Deterministic>
-    <MSBuildWarningsAsMessages>SA0001;AD0001</MSBuildWarningsAsMessages>
+    <MSBuildWarningsAsMessages>SA0001</MSBuildWarningsAsMessages>
     <WarningsAsErrors>nullable</WarningsAsErrors>
     <NoWarn>EnableGenerateDocumentationFile</NoWarn>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
