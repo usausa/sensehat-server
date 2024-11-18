@@ -46,7 +46,7 @@ app.UseSwaggerUI();
 // Map
 app.MapGet("/", static () => "Sense Hat API").ExcludeFromDescription();
 
-app.MapPost("play/{file}", async ([FromRoute] string file, [FromServices] StorageService storage, [FromServices] SenseHatService senseHat) =>
+app.MapPost("play/{file}", static async ([FromRoute] string file, [FromServices] StorageService storage, [FromServices] SenseHatService senseHat) =>
 {
     await using var stream = await storage.ReadAsync(file);
     if (stream is null)
