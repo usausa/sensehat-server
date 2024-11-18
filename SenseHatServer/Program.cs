@@ -60,21 +60,21 @@ app.MapPost("play/{file}", async ([FromRoute] string file, [FromServices] Storag
     return Results.Ok();
 });
 
-app.MapPost("/cancel", ([FromServices] SenseHatService senseHat) =>
+app.MapPost("/cancel", static ([FromServices] SenseHatService senseHat) =>
 {
     senseHat.Cancel();
 
     return Results.Ok();
 });
 
-app.MapPost("/clear", ([FromServices] SenseHatService senseHat) =>
+app.MapPost("/clear", static ([FromServices] SenseHatService senseHat) =>
 {
     senseHat.Clear();
 
     return Results.Ok();
 });
 
-app.MapPost("/show", ([FromBody] string[][] values, [FromServices] SenseHatService senseHat) =>
+app.MapPost("/show", static ([FromBody] string[][] values, [FromServices] SenseHatService senseHat) =>
 {
     var height = (byte)values.Length;
     var width = (byte)values.Max(static x => x.Length);

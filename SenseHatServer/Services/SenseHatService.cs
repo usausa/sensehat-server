@@ -14,7 +14,7 @@ public sealed class SenseHatServiceOptions
 
 public sealed class SenseHatService : IDisposable
 {
-    private readonly object sync = new();
+    private readonly Lock sync = new();
 
     private readonly TaskFactory workerFactory = new(new LimitedConcurrencyTaskScheduler(1));
 
