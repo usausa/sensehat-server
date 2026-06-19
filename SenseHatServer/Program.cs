@@ -74,18 +74,30 @@ app.MapPost("/clear", static ([FromServices] SenseHatService senseHat) =>
     return Results.Ok();
 });
 
-app.MapPost("/show", static ([FromBody] string[][] values, [FromServices] SenseHatService senseHat) =>
+app.MapPost("/show", static ([FromBody] string?[]?[]? values, [FromServices] SenseHatService senseHat) =>
 {
-    var height = (byte)values.Length;
-    var width = (byte)values.Max(static x => x.Length);
-    var image = new SenseHatImage(width, height);
-    for (byte y = 0; y < height; y++)
+    if ((values is null) || (values.Length == 0))
     {
-        for (byte x = 0; x < width; x++)
+        return Results.BadRequest();
+    }
+
+    var image = new SenseHatImage(senseHat.Width, senseHat.Height);
+    var height = Math.Min(values.Length, senseHat.Height);
+    for (var y = 0; y < height; y++)
+    {
+        var row = values[y];
+        if (row is null)
         {
-            if (Int32.TryParse(values[y][x].TrimStart('#'), NumberStyles.HexNumber, null, out var rgb))
+            continue;
+        }
+
+        var width = Math.Min(row.Length, senseHat.Width);
+        for (var x = 0; x < width; x++)
+        {
+            var value = row[x];
+            if ((value is not null) && Int32.TryParse(value.TrimStart('#'), NumberStyles.HexNumber, null, out var rgb))
             {
-                image.SetPixel(x, y, new SenseHatColor((byte)((rgb >> 16) & 0xFF), (byte)((rgb >> 8) & 0xFF), (byte)(rgb & 0xFF)));
+                image.SetPixel((byte)x, (byte)y, new SenseHatColor((byte)((rgb >> 16) & 0xFF), (byte)((rgb >> 8) & 0xFF), (byte)(rgb & 0xFF)));
             }
         }
     }

@@ -19,6 +19,8 @@ public sealed class SenseHatMovie : IDisposable
 
     private const int WaitSize = 4;
 
+    private const int MaxBufferSize = 16 * 1024 * 1024;
+
     private readonly byte[] buffer;
 
     public int FrameCount => BinaryPrimitives.ReadInt32LittleEndian(buffer.AsSpan(FrameOffset));
@@ -34,7 +36,13 @@ public sealed class SenseHatMovie : IDisposable
             throw new ArgumentException("Invalid frame size.", nameof(frame));
         }
 
-        buffer = ArrayPool<byte>.Shared.Rent(HeaderSize + (((width * height * 2) + WaitSize) * frame));
+        var totalSize = HeaderSize + ((((long)width * height * 2) + WaitSize) * frame);
+        if (totalSize > MaxBufferSize)
+        {
+            throw new ArgumentException("Invalid frame size.", nameof(frame));
+        }
+
+        buffer = ArrayPool<byte>.Shared.Rent((int)totalSize);
         BinaryPrimitives.WriteInt32LittleEndian(buffer.AsSpan(FrameOffset), frame);
         buffer[WidthOffset] = width;
         buffer[HeightOffset] = height;
@@ -86,11 +94,7 @@ public sealed class SenseHatMovie : IDisposable
         var header = ArrayPool<byte>.Shared.Rent(HeaderSize);
         try
         {
-            var read = await stream.ReadAsync(header.AsMemory(0, HeaderSize), cancellation).ConfigureAwait(false);
-            if (read != HeaderSize)
-            {
-                throw new IOException("Hat movie load failed.");
-            }
+            await stream.ReadExactlyAsync(header.AsMemory(0, HeaderSize), cancellation).ConfigureAwait(false);
 
             var width = header[WidthOffset];
             var height = header[HeightOffset];
@@ -105,11 +109,7 @@ public sealed class SenseHatMovie : IDisposable
 #pragma warning restore CA2000
 
             var size = ((width * height * 2) + WaitSize) * frame;
-            read = await stream.ReadAsync(movie.buffer.AsMemory(HeaderSize, size), cancellation).ConfigureAwait(false);
-            if (read != size)
-            {
-                throw new IOException("Hat movie load failed.");
-            }
+            await stream.ReadExactlyAsync(movie.buffer.AsMemory(HeaderSize, size), cancellation).ConfigureAwait(false);
 
             return movie;
         }

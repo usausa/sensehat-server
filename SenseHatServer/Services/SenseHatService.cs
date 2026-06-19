@@ -12,11 +12,13 @@ public sealed class SenseHatServiceOptions
     public byte Height { get; set; }
 }
 
-public sealed class SenseHatService : IDisposable
+public sealed partial class SenseHatService : IDisposable, IAsyncDisposable
 {
     private readonly Lock sync = new();
 
     private readonly TaskFactory workerFactory = new(new LimitedConcurrencyTaskScheduler(1));
+
+    private readonly ILogger<SenseHatService> logger;
 
     private readonly Stream device;
 
@@ -26,23 +28,64 @@ public sealed class SenseHatService : IDisposable
 
     private Task? lastRequest;
 
-    public SenseHatService(SenseHatServiceOptions options)
+    private bool disposed;
+
+    public byte Width => clearImage.Width;
+
+    public byte Height => clearImage.Height;
+
+    public SenseHatService(SenseHatServiceOptions options, ILogger<SenseHatService> logger)
     {
+        this.logger = logger;
         device = File.OpenWrite(options.Device);
         clearImage = new SenseHatImage(options.Width, options.Height);
     }
 
     public void Dispose()
     {
+        Task? request;
         lock (sync)
         {
+            if (disposed)
+            {
+                return;
+            }
+
+            disposed = true;
             CancelInternal();
+            request = lastRequest;
+            lastRequest = null;
         }
 
-        lastRequest?.Wait();
+        request?.Wait();
 
         clearImage.Dispose();
         device.Dispose();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        Task? request;
+        lock (sync)
+        {
+            if (disposed)
+            {
+                return;
+            }
+
+            disposed = true;
+            CancelInternal();
+            request = lastRequest;
+            lastRequest = null;
+        }
+
+        if (request is not null)
+        {
+            await request.ConfigureAwait(false);
+        }
+
+        clearImage.Dispose();
+        await device.DisposeAsync().ConfigureAwait(false);
     }
 
     public void Cancel()
@@ -86,11 +129,20 @@ public sealed class SenseHatService : IDisposable
                 {
                     await func((CancellationToken)state!).ConfigureAwait(false);
                 }
-                catch (TaskCanceledException)
+                catch (OperationCanceledException)
                 {
                 }
-            }, cts.Token);
+#pragma warning disable CA1031
+                catch (Exception ex)
+#pragma warning restore CA1031
+                {
+                    ErrorWorkerFailed(ex);
+                }
+            }, cts.Token).Unwrap();
 #pragma warning restore CA2008
         }
     }
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Sense HAT worker failed.")]
+    private partial void ErrorWorkerFailed(Exception exception);
 }

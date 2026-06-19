@@ -28,18 +28,16 @@ public sealed class StorageService
 
     public StorageService(StorageServiceOptions options)
     {
-        root = Path.GetFullPath(options.Root);
+        var fullRoot = Path.GetFullPath(options.Root);
+        root = fullRoot.EndsWith(Path.DirectorySeparatorChar)
+            ? fullRoot
+            : fullRoot + Path.DirectorySeparatorChar;
     }
 
     private string NormalizePath(string path)
     {
-        if (path.EndsWith('/'))
-        {
-            path = path[..^1];
-        }
-
-        var fullPath = Path.Combine(root, path);
-        if (fullPath.Length < root.Length)
+        var fullPath = Path.GetFullPath(Path.Combine(root, path));
+        if (!fullPath.StartsWith(root, StringComparison.Ordinal))
         {
             throw new StorageException("Invalid path.");
         }
