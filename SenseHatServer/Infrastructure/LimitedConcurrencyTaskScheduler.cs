@@ -11,10 +11,7 @@ public sealed class LimitedConcurrencyTaskScheduler : TaskScheduler
 
     public LimitedConcurrencyTaskScheduler(int maxConcurrency)
     {
-        if (maxConcurrency < 1)
-        {
-            throw new ArgumentOutOfRangeException(nameof(maxConcurrency));
-        }
+        ArgumentOutOfRangeException.ThrowIfLessThan(maxConcurrency, 1);
 
         MaximumConcurrencyLevel = maxConcurrency;
     }
