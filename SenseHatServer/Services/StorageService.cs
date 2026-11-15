@@ -29,7 +29,7 @@ public sealed class StorageService
     public StorageService(StorageServiceOptions options)
     {
         var fullRoot = Path.GetFullPath(options.Root);
-        root = fullRoot.EndsWith(Path.DirectorySeparatorChar)
+        root = fullRoot.EndsWith(Path.DirectorySeparatorChar, StringComparison.Ordinal)
             ? fullRoot
             : fullRoot + Path.DirectorySeparatorChar;
     }
